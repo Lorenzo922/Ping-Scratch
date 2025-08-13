@@ -5,39 +5,53 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Ping Scratch</title>
 <style>
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0; padding: 0;
-    background: #f0f0f0;
-    display: flex; height: 100vh;
-  }
-
-  .sidebar {
-    width: 220px;
-    background: #2c3e50;
-    color: white;
-    padding: 20px;
+  /* Reset */
+  * {
     box-sizing: border-box;
   }
 
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f5f5;
+    display: flex;
+    height: 100vh;
+    color: #333;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 240px;
+    background: #2c3e50;
+    color: white;
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+  }
+
   .sidebar h2 {
-    margin-top: 0;
     font-weight: 700;
-    margin-bottom: 20px;
     font-size: 24px;
-    border-bottom: 2px solid #2980b9;
+    margin: 0 0 20px 0;
+    border-bottom: 2px solid #517dbd;
     padding-bottom: 10px;
   }
 
+  /* Blocos estilo Scratch */
   .block {
-    padding: 12px 20px;
-    margin-bottom: 12px;
-    border-radius: 12px;
-    cursor: grab;
     user-select: none;
-    font-weight: 600;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-    transition: transform 0.2s;
+    padding: 12px 18px;
+    margin-bottom: 12px;
+    border-radius: 12px 24px 24px 12px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: grab;
+    color: white;
+    box-shadow:
+      inset 0 4px 8px rgba(255,255,255,0.3),
+      0 3px 6px rgba(0,0,0,0.3);
+    transition: transform 0.2s ease;
+    width: 180px;
   }
 
   .block:active {
@@ -45,48 +59,77 @@
     transform: scale(1.05);
   }
 
+  /* Cores dos blocos */
   .move {
-    background: #27ae60;
+    background: linear-gradient(145deg, #4A90E2, #357ABD);
+    border: 2px solid #2C69B3;
   }
 
   .turn {
-    background: #e67e22;
+    background: linear-gradient(145deg, #F5A623, #D48806);
+    border: 2px solid #B37400;
   }
 
   .say {
-    background: #3498db;
+    background: linear-gradient(145deg, #50E3C2, #3DBF9F);
+    border: 2px solid #2E9A7B;
   }
 
+  /* Workspace */
   .workspace {
     flex: 1;
-    background: white;
+    background: #ffffff;
     margin: 20px;
-    border-radius: 15px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
     padding: 20px;
+    position: relative;
     overflow-y: auto;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    min-height: 200px;
   }
 
-  .workspace .block {
-    cursor: default;
+  /* Grade pontilhada no fundo */
+  .workspace::before {
+    content: "";
+    position: absolute;
+    top: 20px; bottom: 20px; left: 20px; right: 20px;
+    background-image:
+      radial-gradient(#ddd 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 12px;
   }
+
+  /* Container dos blocos adicionados */
+  .workspace .block {
+    position: relative;
+    z-index: 1;
+    margin: 8px;
+    cursor: default;
+    border-radius: 12px 24px 24px 12px;
+  }
+
+  /* Texto inicial */
+  .workspace .placeholder {
+    color: #999;
+    font-style: italic;
+    font-size: 16px;
+    user-select: none;
+  }
+
 </style>
 </head>
 <body>
 
-<div class="sidebar">
+<div class="sidebar" aria-label="Lista de blocos disponíveis">
   <h2>Blocos</h2>
-  <div class="block move" draggable="true" data-type="move">Mover 10 passos</div>
-  <div class="block turn" draggable="true" data-type="turn">Virar 15 graus</div>
-  <div class="block say" draggable="true" data-type="say">Dizer "Olá!"</div>
+  <div class="block move" draggable="true" data-type="move" tabindex="0">Mover 10 passos</div>
+  <div class="block turn" draggable="true" data-type="turn" tabindex="0">Virar 15 graus</div>
+  <div class="block say" draggable="true" data-type="say" tabindex="0">Dizer "Olá!"</div>
 </div>
 
-<div class="workspace" id="workspace">
-  <p style="color:#999;">Arraste os blocos aqui para montar seu script</p>
+<div class="workspace" id="workspace" aria-label="Área para montar os blocos">
+  <p class="placeholder">Arraste os blocos aqui para montar seu script</p>
 </div>
 
 <script>
@@ -96,42 +139,55 @@
   blocks.forEach(block => {
     block.addEventListener('dragstart', e => {
       e.dataTransfer.setData('text/plain', block.dataset.type);
+      // Opcional: custom drag image
     });
   });
 
   workspace.addEventListener('dragover', e => {
     e.preventDefault();
-    workspace.style.background = '#d1f0d1';
+    workspace.style.background = '#eaf4fe';
   });
 
   workspace.addEventListener('dragleave', e => {
-    workspace.style.background = 'white';
+    workspace.style.background = '#ffffff';
   });
 
   workspace.addEventListener('drop', e => {
     e.preventDefault();
-    workspace.style.background = 'white';
+    workspace.style.background = '#ffffff';
 
     const type = e.dataTransfer.getData('text/plain');
-    let newBlock = null;
 
-    if (type === 'move') {
-      newBlock = createBlock('Mover 10 passos', 'move');
-    } else if (type === 'turn') {
-      newBlock = createBlock('Virar 15 graus', 'turn');
-    } else if (type === 'say') {
-      newBlock = createBlock('Dizer "Olá!"', 'say');
-    }
+    if (!type) return;
 
-    if(newBlock) {
-      workspace.appendChild(newBlock);
-    }
+    // Remove texto placeholder se existir
+    const placeholder = workspace.querySelector('.placeholder');
+    if (placeholder) placeholder.remove();
+
+    const newBlock = createBlock(type);
+    workspace.appendChild(newBlock);
   });
 
-  function createBlock(text, cls) {
+  function createBlock(type) {
     const div = document.createElement('div');
-    div.className = 'block ' + cls;
-    div.textContent = text;
+    div.classList.add('block');
+
+    switch(type) {
+      case 'move':
+        div.classList.add('move');
+        div.textContent = 'Mover 10 passos';
+        break;
+      case 'turn':
+        div.classList.add('turn');
+        div.textContent = 'Virar 15 graus';
+        break;
+      case 'say':
+        div.classList.add('say');
+        div.textContent = 'Dizer "Olá!"';
+        break;
+      default:
+        div.textContent = 'Bloco desconhecido';
+    }
     return div;
   }
 </script>
